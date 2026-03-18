@@ -5,7 +5,7 @@ w = 74.5;
 h = 8.4;
 //measured maximum sizes from some shop page but they seem realistic
 
-thickness = 2;
+thickness = 1.5;
 
 scaling = 99/100;
 
@@ -15,7 +15,8 @@ cam_dist_y = 7;
 cam_dist_x = 7;
 
 cam_width = 20; //with tolerance
-cam_height = 40; //with tolerance
+cam_length = 40; //with tolerance
+cam_height = 2;
 
 cam_radius_corners = 5;
 
@@ -26,31 +27,75 @@ length_power_button = 10;
 
 leftright_bottom_spaces = 10;
 
+module rounded_box(w,l,h,r){
+    hull(){
+        translate([w/2-r,l/2-r,0])cylinder(h=h,r=r);
+    translate([w/2-r,-l/2+r,0])cylinder(h=h,r=r);
+    translate([-w/2+r,l/2-r,0])cylinder(h=h,r=r);
+    translate([-w/2+r,-l/2+r,0])cylinder(h=h,r=r);
+    }
+}
+
+module rounded_cube(w,l,h){
+    hull(){
+    translate([w/2-h/2, l/2-h/2,0])sphere(h/2);
+    translate([-w/2+h/2, l/2-h/2,0])sphere(h/2);
+    translate([w/2-h/2, -l/2+h/2,0])sphere(h/2);
+    translate([-w/2+h/2, -l/2+h/2,0])sphere(h/2);
+    }
+}
+
+module phone(){
 color("blue", 0.4)union(){
     translate([w/2, l/2-dist_sound_button-length_sound_button,0])cube([1,length_sound_button,1]);
     
     translate([w/2, l/2-dist_power_button-length_power_button,0])cube([1,length_power_button,1]);
     
-    translate([w/2-cam_dist_x-cam_width/2, l/2-cam_dist_y-cam_height/2,-h/2-thickness])hull(){
-        translate([cam_width/2-cam_radius_corners,cam_height/2-cam_radius_corners,0])cylinder(h=thickness,r=cam_radius_corners);
-    translate([cam_width/2-cam_radius_corners,-cam_height/2+cam_radius_corners,0])cylinder(h=thickness,r=cam_radius_corners);
-    translate([-cam_width/2+cam_radius_corners,cam_height/2-cam_radius_corners,0])cylinder(h=thickness,r=cam_radius_corners);
-    translate([-cam_width/2+cam_radius_corners,-cam_height/2+cam_radius_corners,0])cylinder(h=thickness,r=cam_radius_corners);
+    translate([w/2-cam_dist_x-cam_width/2, l/2-cam_dist_y-cam_length/2,-h/2-thickness])rounded_box(cam_width, cam_length, cam_height, cam_radius_corners);
+    rounded_cube(w,l,h);
+}
+}
+
+module case(){
+    color("yellow", 0.76)union(){
+    difference(){
+    rounded_cube(w+2*thickness,l+2*thickness,h+2*thickness);
+    rounded_cube(w,l,h);
+    translate([0,0,h/2-thickness])rounded_box(w-h/3,l-h/3,thickness*2, h/2);//TODO
+    translate([-w/2+leftright_bottom_spaces,-l/2-thickness,thickness-h/2])cube([w-2*leftright_bottom_spaces,h+thickness,h]);
+    translate([w/2-cam_dist_x-cam_width/2, l/2-cam_dist_y-cam_length/2,-h/2-thickness])rounded_box(cam_width, cam_length, thickness*2, cam_radius_corners);
+    translate([w/2-thickness/2, l/2-dist_sound_button-length_sound_button/2,0])rotate([0,90,0])rounded_box(3, length_sound_button, thickness*2, 1);
+    translate([w/2-thickness/2, l/2-dist_power_button-length_power_button/2,0])rotate([0,90,0])rounded_box(3, length_power_button, thickness*2, 1);
+    translate([w/2-speaker_dist-2.5, l/2+thickness,0])rotate([90,0,0])rounded_box(5, 3, thickness*2, 1);
     }
     
-    
-    
-    hull(){
-        translate([w/2-h/2, l/2-h/2,0])sphere(h/2);
-    translate([-w/2+h/2, l/2-h/2,0])sphere(h/2);
-    translate([w/2-h/2, -l/2+h/2,0])sphere(h/2);
-    translate([-w/2+h/2, -l/2+h/2,0])sphere(h/2);
-    }
+    translate([w/2+thickness/2, l/2-dist_sound_button-length_sound_button/2,0])rotate([0,90,0])rounded_box(3, length_sound_button, thickness, 1);
+    translate([w/2+thickness/2, l/2-dist_power_button-length_power_button/2,0])rotate([0,90,0])rounded_box(3, length_power_button, thickness, 1);
+}
+}
+
+module flipcase(){
+    translate([w/2+thickness,0,h/2+thickness])case();
     
 }
 
 
 
+
+
+
+
+
+
+
+
+//phone();
+flipcase();
+
+
+//TODO look if bottom plate needs to be wider
+
+//translate([-w/2, -l/2,0])cube([w,l,(h+thickness)*2]);
 //color("yellow",0.4)cube([l,w,h], center=true); 
 
 //color("yellow", 0.4)translate([w/2-cam_dist_x-cam_width, l/2-cam_dist_y-cam_height,-h/2-thickness])cube([cam_width, cam_height,thickness]);
