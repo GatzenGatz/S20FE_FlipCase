@@ -56,7 +56,7 @@ module rounded_cube(w,l,h){
 
 
 module phone(){
-color("blue", 0.4)union(){
+    union(){
     translate([w/2, l/2-dist_sound_button-length_sound_button,0])cube([1,length_sound_button,1]);
     
     translate([w/2, l/2-dist_power_button-length_power_button,0])cube([1,length_power_button,1]);
@@ -131,13 +131,6 @@ flipcase();
 
 
 
-
-
-
-
-
-
-flipcase();
 
 
 //TODO look if bottom plate needs to be wider
