@@ -6,6 +6,7 @@ h = 8.4;
 //measured maximum sizes from some shop page but they seem realistic
 
 thickness = 1.5;
+outer_thickness = 2;
 
 scaling = 99/100;
 
@@ -27,6 +28,12 @@ length_power_button = 10;
 
 leftright_bottom_spaces = 10;
 
+eta = 0.05;
+
+pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286208;
+
+tolerance = 0.1;
+
 module rounded_box(w,l,h,r){
     hull(){
         translate([w/2-r,l/2-r,0])cylinder(h=h,r=r);
@@ -35,6 +42,7 @@ module rounded_box(w,l,h,r){
     translate([-w/2+r,-l/2+r,0])cylinder(h=h,r=r);
     }
 }
+
 
 module rounded_cube(w,l,h){
     hull(){
@@ -45,19 +53,21 @@ module rounded_cube(w,l,h){
     }
 }
 
+
 module phone(){
 color("blue", 0.4)union(){
     translate([w/2, l/2-dist_sound_button-length_sound_button,0])cube([1,length_sound_button,1]);
     
     translate([w/2, l/2-dist_power_button-length_power_button,0])cube([1,length_power_button,1]);
     
-    translate([w/2-cam_dist_x-cam_width/2, l/2-cam_dist_y-cam_length/2,-h/2-thickness])rounded_box(cam_width, cam_length, cam_height, cam_radius_corners);
+    translate([w/2-cam_dist_x-cam_width/2, l/2-cam_dist_y-cam_length/2,-h/2-cam_height])rounded_box(cam_width, cam_length, cam_height, cam_radius_corners);
     rounded_cube(w,l,h);
 }
 }
 
+
 module case(){
-    color("yellow", 0.76)union(){
+    union(){
     difference(){
     rounded_cube(w+2*thickness,l+2*thickness,h+2*thickness);
     rounded_cube(w,l,h);
@@ -74,9 +84,21 @@ module case(){
 }
 }
 
+
+
 module flipcase(){
     translate([w/2+thickness,0,h/2+thickness])case();
+    difference(){
+    translate([w/2+thickness, 0, -outer_thickness])rounded_box(w+2*thickness, l+2*thickness, outer_thickness, h/2+thickness);
+    translate([-eta,-l/2-thickness-eta, -outer_thickness-eta])cube([h/2+thickness+eta, l+2*thickness+2*eta,outer_thickness+2*eta]);
+    translate([w+thickness-cam_dist_x-cam_width/2, l/2-cam_dist_y-cam_length/2,-outer_thickness*2])rounded_box(cam_width, cam_length, outer_thickness*3, cam_radius_corners);
+    }
+    translate([h/2+thickness-pi/2*(h+thickness*2+outer_thickness*2)-2*tolerance,-l/2-thickness, -outer_thickness])cube([pi/2*(h+thickness*2+outer_thickness*2)+2*tolerance, l+2*thickness, outer_thickness/2]);
     
+    translate([h+2*thickness-pi/2*(h+thickness*2+outer_thickness*2)-2*tolerance,0,-outer_thickness])rotate([0,180,0])difference(){
+    translate([w/2+thickness, 0, -outer_thickness])rounded_box(w+2*thickness, l+2*thickness, outer_thickness, h/2+thickness);
+    translate([-eta,-l/2-thickness-eta, -outer_thickness-eta])cube([h/2+thickness+eta, l+2*thickness+2*eta,outer_thickness+2*eta]);
+    }
 }
 
 
@@ -89,7 +111,18 @@ module flipcase(){
 
 
 
-//phone();
+flipcase();
+
+
+
+
+
+
+
+
+
+
+
 flipcase();
 
 
