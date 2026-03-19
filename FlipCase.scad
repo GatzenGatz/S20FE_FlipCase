@@ -6,9 +6,7 @@ h = 8.4;
 //measured maximum sizes from some shop page but they seem realistic
 
 thickness = 1.5;
-outer_thickness = 2;
-
-scaling = 99/100;
+outer_thickness = 3;
 
 speaker_dist = 20;
 
@@ -28,11 +26,14 @@ length_power_button = 10;
 
 leftright_bottom_spaces = 10;
 
+magnet_flip_width = 15;
+
+tolerance = 0.1;
+
 eta = 0.05;
 
 pi = 3.141592653589793238462643383279502884197169399375105820974944592307816406286208;
 
-tolerance = 0.1;
 
 module rounded_box(w,l,h,r){
     hull(){
@@ -87,6 +88,8 @@ module case(){
 
 
 module flipcase(){
+    difference(){
+    union(){
     translate([w/2+thickness,0,h/2+thickness])case();
     difference(){
     translate([w/2+thickness, 0, -outer_thickness])rounded_box(w+2*thickness, l+2*thickness, outer_thickness, h/2+thickness);
@@ -99,10 +102,21 @@ module flipcase(){
     translate([w/2+thickness, 0, -outer_thickness])rounded_box(w+2*thickness, l+2*thickness, outer_thickness, h/2+thickness);
     translate([-eta,-l/2-thickness-eta, -outer_thickness-eta])cube([h/2+thickness+eta, l+2*thickness+2*eta,outer_thickness+2*eta]);
     }
+    translate([w+2*thickness,-magnet_flip_width/2, -outer_thickness])cube([h+2*thickness+2*outer_thickness+2*tolerance, magnet_flip_width, outer_thickness/2]);
+    translate([w+2*thickness,-magnet_flip_width/2, -outer_thickness])cube([h+2*thickness+2*outer_thickness+2*tolerance, magnet_flip_width, outer_thickness/2]);
+    translate([h+4*thickness+2*outer_thickness+w,-magnet_flip_width/2, -outer_thickness])cube([(h+2*thickness+2*outer_thickness)/2, magnet_flip_width, outer_thickness]);
+    translate([w+4*thickness+h+2*outer_thickness+(h+2*thickness+2*outer_thickness)/2,0, -outer_thickness])rounded_box(h+2*thickness+2*outer_thickness, magnet_flip_width, outer_thickness,magnet_flip_width/2);   
+    }
+    // magnets
+    translate([w+4*thickness+h+2*outer_thickness+h+2*thickness+2*outer_thickness-magnet_flip_width/2,0,-outer_thickness+(outer_thickness-2)/2-tolerance])cylinder(h=2+tolerance,r=3+tolerance*2);
+    translate([h/2+thickness-pi/2*(h+thickness*2+outer_thickness*2)-2*tolerance-w+2*thickness+magnet_flip_width/2,0,-outer_thickness+(outer_thickness-2)/2-tolerance])cylinder(h=2+tolerance,r=3+tolerance*2);
+    }
 }
 
 
 
+translate([w+4*thickness+h+2*outer_thickness+h+2*thickness+2*outer_thickness-magnet_flip_width/2,0,-outer_thickness+(outer_thickness-2)/2-tolerance])cylinder(h=2+tolerance,r=3+tolerance*2);
+    translate([h/2+thickness-pi/2*(h+thickness*2+outer_thickness*2)-2*tolerance-w+2*thickness+magnet_flip_width/2,0,-outer_thickness+(outer_thickness-2)/2-tolerance])cylinder(h=2+tolerance,r=3+tolerance*2);
 
 
 
