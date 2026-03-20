@@ -115,17 +115,14 @@ module flipcase(){
 
 
 
-translate([w+4*thickness+h+2*outer_thickness+h+2*thickness+2*outer_thickness-magnet_flip_width/2,0,-outer_thickness+(outer_thickness-2)/2-tolerance])cylinder(h=2+tolerance,r=3+tolerance*2);
-    translate([h/2+thickness-pi/2*(h+thickness*2+outer_thickness*2)-2*tolerance-w+2*thickness+magnet_flip_width/2,0,-outer_thickness+(outer_thickness-2)/2-tolerance])cylinder(h=2+tolerance,r=3+tolerance*2);
 
 
 
 
 
-
-
-
-flipcase();
+translate([w/2+thickness, 0, h/2+thickness])phone();
+//translate([w/2+thickness, 0, h/2+thickness])case();
+//flipcase();
 
 
 
