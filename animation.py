@@ -81,18 +81,24 @@ def center_origin(obj):
 def add_material(obj, name, color, alpha=1.0):
     mat = bpy.data.materials.new(name)
     mat.use_nodes = True
-    mat.blend_method = 'BLEND'
+    mat.blend_method = 'BLEND' if alpha < 1.0 else 'OPAQUE'
     bsdf = mat.node_tree.nodes.get("Principled BSDF")
     if bsdf:
         bsdf.inputs["Base Color"].default_value = (*color, 1.0)
         bsdf.inputs["Alpha"].default_value = alpha
-        bsdf.inputs["Roughness"].default_value = 0.3
-        bsdf.inputs["Metallic"].default_value = 0.1
+        bsdf.inputs["Roughness"].default_value = 0.25
+        bsdf.inputs["Metallic"].default_value = 0.15
+        bsdf.inputs["Specular IOR Level"].default_value = 0.5
     if obj.data.materials:
         obj.data.materials[0] = mat
     else:
         obj.data.materials.append(mat)
     return mat
+
+def set_blend_mode(obj, mode):
+    """Switch material blend mode (needed when alpha animates through transparent)."""
+    if obj.data.materials:
+        obj.data.materials[0].blend_method = mode
 
 def set_alpha(obj, alpha, frame):
     mat = obj.data.materials[0]
@@ -105,6 +111,15 @@ def set_alpha(obj, alpha, frame):
 
 scene = bpy.context.scene
 scene.render.fps = FPS
+
+# Dark world background so we dont get a gray render
+world = bpy.data.worlds.get("World") or bpy.data.worlds.new("World")
+scene.world = world
+world.use_nodes = True
+bg = world.node_tree.nodes.get("Background")
+if bg:
+    bg.inputs["Color"].default_value = (0.02, 0.02, 0.02, 1.0)
+    bg.inputs["Strength"].default_value = 0.5
 scene.frame_start = 1
 scene.frame_end = TOTAL_FRAMES
 
@@ -115,13 +130,21 @@ for obj in list(bpy.data.objects):
 
 # Camera
 if "Camera" not in bpy.data.objects:
-    bpy.ops.object.camera_add(location=(0, -350, 60))
+    bpy.ops.object.camera_add(location=(0, -400, 150))
     cam = bpy.context.object
     cam.name = "Camera"
 else:
     cam = bpy.data.objects["Camera"]
-cam.location = (0, -320, 80)
-cam.rotation_euler = (math.radians(80), 0, 0)
+cam.location = (0, -400, 150)
+cam.rotation_euler = (math.radians(70), 0, 0)
+cam.data.lens = 50
+# Track-to constraint so camera always faces the scene center
+if "Track To" not in [c.name for c in cam.constraints]:
+    track = cam.constraints.new(type="TRACK_TO")
+    track.name = "Track To"
+    track.target = None  # will track world origin
+    track.up_axis = "UP_Y"
+    track.track_axis = "TRACK_NEGATIVE_Z"
 scene.camera = cam
 
 # Key light
@@ -282,13 +305,8 @@ for obj in (phone, case_obj, flip_obj, hinge):
 
 # ── RENDER SETTINGS (optional quick setup) ───────────────────────────────────
 
-scene.render.engine = 'CYCLES'
-try:
-    scene.cycles.device = 'GPU'
-except:
-    pass
-scene.cycles.samples = 64
-scene.cycles.use_denoising = False  # disabled: apt Blender has no OpenImageDenoise
+scene.render.engine = 'BLENDER_EEVEE_NEXT'  # faster, works on apt Blender
+scene.eevee.taa_render_samples = 64  # EEVEE render quality
 scene.render.resolution_x = 1920
 scene.render.resolution_y = 1080
 scene.render.image_settings.file_format = 'FFMPEG'
@@ -298,11 +316,7 @@ scene.render.filepath = "//flipcase_animation.mp4"
 
 # ── VIEWPORT SHADING ─────────────────────────────────────────────────────────
 
-for area in bpy.context.screen.areas:
-    if area.type == 'VIEW_3D':
-        for space in area.spaces:
-            if space.type == 'VIEW_3D':
-                space.shading.type = 'MATERIAL'
+# (viewport shading skipped - not available in background/headless mode)
 
 # SAVE SCENE + RENDER
 import os
