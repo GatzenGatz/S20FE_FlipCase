@@ -120,9 +120,9 @@ module flipcase(){
 
 
 
-translate([w/2+thickness, 0, h/2+thickness])phone();
+//translate([w/2+thickness, 0, h/2+thickness])phone();
 //translate([w/2+thickness, 0, h/2+thickness])case();
-//flipcase();
+flipcase();
 
 
 
